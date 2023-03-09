@@ -15,6 +15,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
+use Nette\Utils\DateTime;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -141,7 +142,7 @@ class GoogleSynchronizer
 
         $query = Arr::only($options, ['timeMin', 'timeMax', 'maxResults']);
         $query = array_merge($query, [
-            'maxResults' => 1,
+            'maxResults' => 100,
             'timeMin' => $now->copy()->startOfMonth()->toRfc3339String(),
             'timeMax' => $now->copy()->addMonth()->toRfc3339String()
         ]);
@@ -170,12 +171,12 @@ class GoogleSynchronizer
 
         $url = "/calendar/{$this->provider->getVersion()}/calendars/${calendarId}/events";
 
-        do {
-            if (isset($pageToken) && empty($syncToken)) {
-                $query = [
-                    'pageToken' => $pageToken
-                ];
-            }
+        // do {
+            // if (isset($pageToken) && empty($syncToken)) {
+            //     $query = [
+            //         'pageToken' => $pageToken
+            //     ];
+            // }
 
             Log::debug('Synchronize Events', [
                 'query' => $query
@@ -189,12 +190,12 @@ class GoogleSynchronizer
 
             $items = $body['items'];
 
-            $pageToken = $body['nextPageToken'] ?? null;
+            // $pageToken = $body['nextPageToken'] ?? null;
 
             // Skip loop
-            if (count($items) === 0) {
-                break;
-            }
+            // if (count($items) === 0) {
+            //     break;
+            // }
 
             $itemIterator = new \ArrayIterator($items);
 
@@ -206,15 +207,15 @@ class GoogleSynchronizer
                 $itemIterator->next();
             }
 
-        } while (is_null($pageToken) === false);
+        // } while (is_null($pageToken) === false);
 
-        $syncToken = $body['nextSyncToken'];
+        // $syncToken = $body['nextSyncToken'];
         $now = now();
 
         $calendarRepository->updateByAttributes(
             ['provider_id' => $calendarId, 'account_id' => $accountId],
             [
-                'sync_token' => Crypt::encryptString($syncToken),
+                // 'sync_token' => Crypt::encryptString($syncToken),
                 'last_sync_at' => $now,
                 'updated_at' => $now
             ]
@@ -245,8 +246,8 @@ class GoogleSynchronizer
             return;
         }
 
-        $eventStart = $this->parseDateTime($event['start'] ?? null);
-        $eventEnd = $this->parseDateTime($event['end'] ?? null);
+        $eventStart = Carbon::parse($this->parseDateTime($event['start'] ?? null));
+        $eventEnd = Carbon::parse($this->parseDateTime($event['end'] ?? null));
 
         $isAllDay = isset($event['start']['date']);
 
