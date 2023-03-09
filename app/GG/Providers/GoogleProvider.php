@@ -34,6 +34,10 @@ class GoogleProvider extends AbstractProvider
     {
         return $this->getHttpClient()->fetchAccessTokenWithAuthCode($code);
     }
+    protected function fetchAccessTokenWithRefreshToken(string $code): array
+    {
+        return $this->getHttpClient()->fetchAccessTokenWithRefreshToken($code);
+    }
 
     /**
      * @return array

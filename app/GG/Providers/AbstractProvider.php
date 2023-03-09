@@ -80,6 +80,27 @@ abstract class AbstractProvider implements ProviderInterface
 
         return $this->account->setUserId($userId)->setToken($token);
     }
+
+    public function callback2(Account $account): Account
+    {
+        $token = $account->getToken();
+        $oldC = $token->getAccessToken();
+        $old = $token->getRefreshToken();
+        try {
+
+            $credentials = $this->fetchAccessTokenWithRefreshToken($old);
+            dd($old, $oldC, $credentials);
+            // $this->account = $this->toUser($this->getBasicProfile($credentials));
+        } catch (\Exception $exception) {
+            report($exception);
+            throw new \InvalidArgumentException($exception->getMessage());
+        }
+
+        // $token = $this->createToken($credentials);
+        // $userId = $state['user_id'] ?? null;
+
+        // return $this->account->setUserId($userId)->setToken($token);
+    }
     protected function getHttpClient()
     {
         if (is_null($this->httpClient)) {
@@ -136,6 +157,7 @@ abstract class AbstractProvider implements ProviderInterface
     }
     abstract protected function createAuthUrl();
     abstract protected function fetchAccessTokenWithAuthCode(string $code);
+    abstract protected function fetchAccessTokenWithRefreshToken(string $code);
     abstract protected function getBasicProfile($credentials);
     abstract protected function toUser($userProfile);
     abstract protected function createToken(array $credentials): Token;
