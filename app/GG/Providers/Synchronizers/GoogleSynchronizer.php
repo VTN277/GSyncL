@@ -143,8 +143,8 @@ class GoogleSynchronizer
         $query = Arr::only($options, ['timeMin', 'timeMax', 'maxResults']);
         $query = array_merge($query, [
             'maxResults' => 100,
-            'timeMin' => $now->copy()->startOfMonth()->toRfc3339String(),
-            'timeMax' => $now->copy()->addMonth()->toRfc3339String()
+            'timeMin' => date(DateTime::ATOM, mktime(0,0,0,03,01, 2023)),
+            'timeMax' => date(DateTime::ATOM, mktime(23,59,59,03,30, 2023))
         ]);
 
         $calendarRepository = $this->repository(CalendarRepository::class);
