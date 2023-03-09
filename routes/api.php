@@ -22,3 +22,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/oauth2/{provider}', [AccountController::class, 'auth']);
 Route::get('/oauth2/{provider}/callback', [AccountController::class, 'callback']);
 Route::get('/event', [AccountController::class, 'getEvent']);
+Route::post('/pushEvent', [AccountController::class, 'pushEvent']);

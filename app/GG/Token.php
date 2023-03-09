@@ -127,6 +127,11 @@ class Token implements Arrayable
         return $this->accessToken;
     }
 
+    public function getRefreshToken(): string
+    {
+        return $this->refreshToken;
+    }
+
     /**
      * @return array
      */

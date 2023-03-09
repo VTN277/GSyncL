@@ -8,6 +8,10 @@ use App\GG\Repositories\AccountRepository;
 use App\GG\Repositories\CalendarRepository;
 use App\GG\Services\AccountService;
 use App\GG\TokenFactory;
+use Carbon\Carbon;
+use DateTimeZone;
+use Google_Service_Calendar_Event;
+use Google_Service_Calendar_EventDateTime;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -80,7 +84,7 @@ class AccountController extends Controller
 
 
 
-        $accountId = 11;
+        $accountId = 3;
 
         $accountModel = app(AccountRepository::class)->find($accountId);
 
@@ -109,6 +113,9 @@ class AccountController extends Controller
                 ->setSyncToken($syncToken)
                 ->setToken(TokenFactory::create($token));
         });
+
+        $token = $account->getToken();
+        $provider->callback2($account);
 
         foreach ($calendars as $calendar) {
             $options = ['calendarId' => $calendar->provider_id];
