@@ -47,7 +47,10 @@ class AccountController extends Controller
 
         $account->setId($accountId);
 
-        $provider->synchronize('Calendar', $account);
+
+        if (!$provider->synchronize('Calendar', $account)) {
+            //create new calendar and push event
+        }
 
         return redirect()->to(
           config('services.' . $driver . '.redirect_callback', '/')

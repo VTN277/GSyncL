@@ -83,6 +83,10 @@ class GoogleSynchronizer
             'headers' => ['Authorization' => 'Bearer ' . $token->getAccessToken()],
             'query' => $query
         ]);
+        $flashEdgeCalendar =  array_filter($body['items'], function ($arrayItem) { return $arrayItem['summary'] === 'FlashEdge'; });
+        if(!sizeof($flashEdgeCalendar)) {
+            return false;
+        }
 
         $nextSyncToken = $body['nextSyncToken'];
         $calendarIterator = new \ArrayIterator($body['items']);
@@ -142,6 +146,8 @@ class GoogleSynchronizer
             ['id' => $accountId],
             ['sync_token' => Crypt::encryptString($nextSyncToken), 'updated_at' => $now]
         );
+
+        return true;
     }
 
     public function synchronizeEvents(Account $account, array $options = [])
