@@ -84,7 +84,7 @@ class AccountController extends Controller
 
 
 
-        $accountId = 3;
+        $accountId = 8;
 
         $accountModel = app(AccountRepository::class)->find($accountId);
 
@@ -114,9 +114,8 @@ class AccountController extends Controller
                 ->setToken(TokenFactory::create($token));
         });
 
-        $token = $account->getToken();
-        $provider->callback2($account);
-
+        $newAccount =  $provider->genNewToken($account);
+        $accountId = app(AccountService::class)->createFrom($account, 'google');
         foreach ($calendars as $calendar) {
             $options = ['calendarId' => $calendar->provider_id];
 
@@ -124,7 +123,7 @@ class AccountController extends Controller
                 $options['syncToken'] = Crypt::decryptString($calendar->sync_token);
             }
 
-            $provider->synchronize('Event', $account, $options);
+            $provider->synchronize('Event', $newAccount, $options);
         }
 
     }
