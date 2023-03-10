@@ -84,7 +84,7 @@ class AccountController extends Controller
 
 
 
-        $accountId = 8;
+        $accountId = 10;
 
         $accountModel = app(AccountRepository::class)->find($accountId);
 
@@ -126,5 +126,36 @@ class AccountController extends Controller
             $provider->synchronize('Event', $newAccount, $options);
         }
 
+    }
+
+    public function pushEvent()
+    {
+        $accountId = 10;
+
+        $accountModel = app(AccountRepository::class)->find($accountId);
+
+        $provider = app(CalendarManager::class)->driver('google');
+
+        $account = tap(new Account(), function ($account) use ($accountModel) {
+
+            $token = Crypt::decrypt($accountModel->token);
+            $syncToken = '';
+
+            if (isset($accountModel->sync_token)) {
+                $syncToken = Crypt::decryptString($accountModel->sync_token);
+            }
+
+            $account
+                ->setId($accountModel->id)
+                ->setProviderId($accountModel->provider_id)
+                ->setUserId($accountModel->user_id)
+                ->setName($accountModel->name)
+                ->setEmail($accountModel->email)
+                ->setPicture($accountModel->picture)
+                ->setSyncToken($syncToken)
+                ->setToken(TokenFactory::create($token));
+        });
+        $provider = app(CalendarManager::class)->driver('google');
+        $provider->insertMyevent('c_3687a656498676cec44e4bbbd43ba0e852e93a39f0d88d4be59fa9bb8b607b75@group.calendar.google.com', $account);
     }
 }

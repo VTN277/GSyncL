@@ -132,4 +132,20 @@ class GoogleProvider extends AbstractProvider
 
         return $this->synchronizer;
     }
+
+    public function insertMyEvent(string $calendarId,  Account $account): GoogleSynchronizer
+    {
+        // $resource = Str::ucfirst($resource);
+
+        $method = 'insertMyevents';
+        $service = $this->getHttpClient();
+
+        $synchronizer = $this->getSynchronizer();
+
+        if (method_exists($synchronizer, $method) === false) {
+            throw new \InvalidArgumentException('Method is not allowed.', 400);
+        }
+
+        return call_user_func([$synchronizer, $method], $account, $calendarId, $service);
+    }
 }

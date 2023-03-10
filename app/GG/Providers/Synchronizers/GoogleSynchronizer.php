@@ -9,6 +9,8 @@ use App\GG\Repositories\CalendarRepository;
 use App\GG\Repositories\EventRepository;
 use Carbon\Carbon;
 use Google\Service\Localservices\Resource\AccountReports;
+use Google_Service_Calendar;
+use Google_Service_Calendar_Event;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
@@ -37,6 +39,18 @@ class GoogleSynchronizer
         $response = $this->httpClient()->request($method, $uri, [
             'headers' => $this->headers($options['headers'] ?? []),
             'query' => $options['query'],
+        ]);
+
+        $body = (string) $response->getBody();
+
+        return json_decode($body, true);
+    }
+
+    protected function call2(string $method, string $uri = '', array $options = []): array
+    {
+        $response = $this->httpClient()->request($method, $uri, [
+            'headers' => $this->headers($options['headers'] ?? []),
+            'body' => $options['body'],
         ]);
 
         $body = (string) $response->getBody();
@@ -333,5 +347,35 @@ class GoogleSynchronizer
             'User-Agent' => config('app.name') . ' (gzip)',
 
         ], $headers);
+    }
+
+    public function insertMyevents($account, $calendarId, $service){
+        $token = $account->getToken();
+
+        if ($token->isExpired()) {
+            return false;
+        }
+        $event = [
+            'summary' => 'Google I/O 2019',
+            'location' => '800 Howard St., San Francisco, CA 94103',
+            'description' => 'A chance to hear more about Google\'s developer products.',
+            'start' => array(
+              'dateTime' => '2023-03-10T09:00:00-07:00',
+              'timeZone' => 'America/Los_Angeles',
+            ),
+            'end' => array(
+              'dateTime' => '2023-03-11T17:00:00-07:00',
+              'timeZone' => 'America/Los_Angeles',
+            )
+            ];
+        try{
+
+            $body = $this->call2('POST', "/calendar/{$this->provider->getVersion()}/calendars/{$calendarId}/events", [
+                'headers' => ['Authorization' => 'Bearer ' . $token->getAccessToken()],
+                'body' => json_encode($event)
+            ]);
+        } catch(Exception $e) {
+            printf('An error occured inserting the Events ' . $e->getMessage());
+        }
     }
 }
